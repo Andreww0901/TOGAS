@@ -1,0 +1,9 @@
+Qiskit==0.42.1
+pylatexenc
+matplotlib==3.7.1
+deap~=1.3.3
+PySimpleGUI==4.60.4
+Pillow~=9.4.0
+numpy==1.24.2
+pandas~=2.0.0
+qiskit_ibm_provider==0.6.2
