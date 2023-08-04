@@ -113,7 +113,7 @@ def plot_city(individual, no_qb, filename, ancillae, noise=None):
     elif isinstance(individual, list):
         circuit = circuit_builder(individual, no_qb, ancillae)
         if noise:
-            simulator = AerSimulator.from_backend(FakeVigo())
+            simulator = AerSimulator.from_backend(noise)
         else:
             simulator = Aer.get_backend('aer_simulator')
         qobj = transpile(circuit, simulator)
