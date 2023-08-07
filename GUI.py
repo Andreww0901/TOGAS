@@ -9,9 +9,12 @@ from qiskit.quantum_info import random_statevector, Statevector
 from pandas import DataFrame
 from qiskit_ibm_provider import IBMProvider
 import matplotlib.pyplot as plt
+from matplotlib import rcParams
 
 # IBMProvider.save_account(token="MY_API_TOKEN", overwrite=True)
 
+rcParams['font.family'] = 'IBM Plex Mono'
+rcParams['font.serif'] = ['IBM Plex Mono Light']
 heading_font = ("IBM Plex Mono", 24)
 body_font = ("IBM Plex Mono Light", 16)
 bckgrnd_col = 'White'
@@ -168,7 +171,7 @@ if __name__ == "__main__":
                 hof = literal_eval(line[4:-1])
                 hof_list.append(hof[0])
                 hof_ind.append(hof[1])
-                window['-BF-'].update(f'{hof[0]}')
+                window['-BF-'].update(f'{hof[0]}  ~~~  CIRCUIT LENGTH:{len(hof[1])}')
                 if hof[0] >= 100:
                     GA_proc.terminate()
                     GA_proc = None

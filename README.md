@@ -7,7 +7,7 @@
 - Random state preperation using genetic algorithms
 - Optimised for T-Count (Can be more generally applied to different types of quantum computer instead of just IBM Quantum systems)
 
-Execute from GUI.py
+**Execute from GUI.py**
 
 Note: 
 

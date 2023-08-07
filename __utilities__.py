@@ -85,10 +85,13 @@ def evaluate(individual, no_qb, statevector, t_count, ancillae, noise=None):
     result = Statevector(list(result.data)[:2**(no_qb-ancillae)], dims=tuple(2 for _ in range(no_qb-ancillae)))
     if t_count:
         no_tg = 0
+        no_cnot = 0
         for x in range(len(individual)):
             if individual[x][0] == 'TGate' or individual[x][0] == 'TDGGate':
                 no_tg += 1
-        return state_fidelity(result, statevector, validate=False) - (no_tg*0.0001),
+            elif individual[x][0] == 'CNOT':
+                no_cnot += 1
+        return state_fidelity(result, statevector, validate=False) - (no_tg * 0.00001),
     else:
         return state_fidelity(result, statevector, validate=False),
 
