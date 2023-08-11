@@ -91,7 +91,7 @@ def evaluate(individual, no_qb, statevector, t_count, ancillae, noise=None):
                 no_tg += 1
             elif individual[x][0] == 'CNOT':
                 no_cnot += 1
-        return state_fidelity(result, statevector, validate=False) - (no_tg * 0.00001),
+        return state_fidelity(result, statevector, validate=False), no_tg, no_cnot
     else:
         return state_fidelity(result, statevector, validate=False),
 

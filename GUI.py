@@ -5,6 +5,7 @@ import base64
 import gc
 from ast import literal_eval
 from __utilities__ import draw_circuit, plot_hist, plot_city, img_resize, img_combine
+from __statecreation___ import poisson
 from qiskit.quantum_info import random_statevector, Statevector
 from pandas import DataFrame
 from qiskit_ibm_provider import IBMProvider
@@ -56,11 +57,13 @@ layout = [[PyGUI.Text('Genetic Quantum Circuit Synthesizer For State Preperation
            PyGUI.InputText(background_color=bckgrnd_col, text_color=txt_col, font=body_font, default_text="0.5",
                            border_width=1, key='-CXPB-'),
            PyGUI.Push(background_color=bckgrnd_col),
-           PyGUI.Spin([i for i in range(5)], initial_value=1, size=5, key='-NOANCI-'),
+           PyGUI.Spin([i for i in range(5)], initial_value=0, size=5, key='-NOANCI-'),
            PyGUI.Text(':NO. OF ANCILLAE', background_color=bckgrnd_col, text_color=txt_col, font=body_font)],
           [PyGUI.Text('MUTATION PROB.:', background_color=bckgrnd_col, text_color=txt_col, font=body_font),
            PyGUI.InputText(background_color=bckgrnd_col, text_color=txt_col, font=body_font, default_text="0.5",
-                           border_width=1, key='-MUTPB-')],
+                           border_width=1, key='-MUTPB-'),
+           PyGUI.Push(background_color=bckgrnd_col),
+           PyGUI.Checkbox(":POISSON STATEVECTOR", background_color=bckgrnd_col, checkbox_color=txt_col, text_color=txt_col, font=body_font, key='-POISV-', default=False)],
           [PyGUI.Text('CROSSOVER TYPE:', background_color=bckgrnd_col, text_color=txt_col, font=body_font),
            PyGUI.Combo(cxList, size=(35, 20), text_color=txt_col,
                        background_color=bckgrnd_col, font=body_font, readonly=True, default_value='MessyOnePoint',
@@ -69,7 +72,10 @@ layout = [[PyGUI.Text('Genetic Quantum Circuit Synthesizer For State Preperation
            PyGUI.Combo(selList,
                        size=(35, 20), text_color=txt_col,
                        background_color=bckgrnd_col, font=body_font, readonly=True, default_value='selBest',
-                       button_background_color=txt_col, button_arrow_color=bckgrnd_col, key='-SEL-')],
+                       button_background_color=txt_col, button_arrow_color=bckgrnd_col, key='-SEL-'),
+           PyGUI.Push(background_color=bckgrnd_col),
+           PyGUI.Text('', background_color=bckgrnd_col, text_color=txt_col, font=body_font, key='-AVGLEN-'),
+           PyGUI.Text(':AVERAGE SOLUTION LENGTH', background_color=bckgrnd_col, text_color=txt_col, font=body_font)],
           [PyGUI.Button('START', button_color=(bckgrnd_col, "#1ec74b"), font=body_font, border_width=0),
            PyGUI.Button('STOP', button_color=(bckgrnd_col, "#c91827"), font=body_font, border_width=0),
            PyGUI.Multiline(size=(1000, 1), background_color=bckgrnd_col, text_color=txt_col, font=body_font,
@@ -111,10 +117,13 @@ if __name__ == "__main__":
         else:
             bckend = None
 
-        if values['-SSEED-']:
-            singular = random_statevector(tuple(2 for _ in range(values['-NOQB-'])), seed=2)
+        if values['-POISV-']:
+            singular = poisson(round((int(values['-NOQB-'])**2)/2), int(values['-NOQB-']))
         else:
-            singular = random_statevector(tuple(2 for _ in range(values['-NOQB-'])))
+            if values['-SSEED-']:
+                singular = random_statevector(tuple(2 for _ in range(values['-NOQB-'])), seed=2)
+            else:
+                singular = random_statevector(tuple(2 for _ in range(values['-NOQB-'])))
         plot_city(singular, values['-NOQB-'], "desiredState.png", int(values["-SNOISE-"]))
         print(singular)
         if values['-NOQB-'] <= values['-NOANCI-']:
@@ -143,6 +152,7 @@ if __name__ == "__main__":
             window['-SSEED-'].update(disabled=True)
             window['-SNOISE-'].update(disabled=True)
             window['-STCOUNT-'].update(disabled=True)
+            window['-POISV-'].update(disabled=True)
             if GA_proc is not None:
                 GA_proc.terminate()
             GA_proc, backend = sub_process()
@@ -155,6 +165,7 @@ if __name__ == "__main__":
             window['-SSEED-'].update(disabled=False)
             window['-SNOISE-'].update(disabled=False)
             window['-STCOUNT-'].update(disabled=False)
+            window['-POISV-'].update(disabled=False)
             GA_proc.terminate()
             GA_proc = None
 
@@ -176,6 +187,9 @@ if __name__ == "__main__":
                     GA_proc.terminate()
                     GA_proc = None
                     stop = True
+
+            elif line.startswith("AVGLEN:"):
+                window['-AVGLEN-'].update(f'{line[7:-1]}')
 
             if line.startswith('END') or stop:
                 if not os.path.exists(f'./evaluations/selections/{values["-SEL-"]}'):

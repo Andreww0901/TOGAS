@@ -82,7 +82,7 @@ def optimise(individual):
                 if individual[x + 1][0] == 'XGate' and individual[x + 1][1][0] == individual[x][1][0]:
                     individual.pop(x)
                     individual.pop(x)
-            case "CNOTs":
+            case "CNOT":
                 if individual[x + 1][0] == 'CNOT' and individual[x + 1][1][0] == individual[x][1][0] and individual[x + 1][1][1] == individual[x][1][1]:
                     individual.pop(x)
                     individual.pop(x)
@@ -90,8 +90,30 @@ def optimise(individual):
     return individual,
 
 
+def sequence_insertion(individual, no_qb):
+    sequence = [ind_setup(no_qb) for _ in range(random.randrange(25))]
+    if len(individual) < 1:
+        for gate in sequence:
+            individual.append(gate)
+    else:
+        index = random.randrange(0, len(individual))
+        sequence.reverse()
+        for gate in sequence:
+            individual.insert(index, gate)
+
+    return individual,
+
+
+def sequence_deletion(individual):
+    if len(individual) >= 1:
+        start = random.randrange(len(individual))
+        for _ in range(random.randrange(len(individual)-start)):
+            individual.pop(start)
+    return individual,
+
+
 def mixed_mutation(individual, no_qb):
-    match random.randrange(0, 5):
+    match random.randrange(0, 7):
         case 0:
             individual, = gate_value_change(individual, no_qb)
         case 1:
@@ -102,4 +124,8 @@ def mixed_mutation(individual, no_qb):
             individual, = switch(individual, no_qb)
         case 4:
             individual, = optimise(individual)
+        case 5:
+            individual, = sequence_insertion(individual, no_qb)
+        case 6:
+            individual, = sequence_deletion(individual)
     return individual,

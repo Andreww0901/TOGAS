@@ -10,6 +10,7 @@ from deap import creator, base, tools, algorithms
 from qiskit.quantum_info import Statevector
 from qiskit_ibm_provider import IBMProvider
 from ast import literal_eval
+from math import exp
 
 pop_size = int(sys.argv[1])
 no_gens = int(sys.argv[2])
@@ -31,7 +32,7 @@ if noise:
 else:
     backend = None
 
-creator.create("FitnessMax", base.Fitness, weights=(1.0,))
+creator.create("FitnessMax", base.Fitness, weights=(1.0, -0.002, -exp(-no_qb)))
 creator.create("Individual", list, fitness=creator.FitnessMax)
 
 toolbox = base.Toolbox()
@@ -67,7 +68,9 @@ def _genetic_algorithm():
         population = toolbox.select(offspring, k=pop_size)
 
         best_fitness = 0
+        avg_len = 0
         for individual in population:
+            avg_len += len(individual)
             if individual.fitness.values[0] > best_fitness:
                 best_fitness, best_ind = individual.fitness.values[0], individual
 
@@ -77,6 +80,7 @@ def _genetic_algorithm():
 
         print(f'GEN:{generation}')
         print(f'HOF:{hof}')
+        print(f'AVGLEN:{avg_len/len(population)}')
     # print(f'END')
 
 
