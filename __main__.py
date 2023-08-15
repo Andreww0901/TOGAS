@@ -32,7 +32,10 @@ if noise:
 else:
     backend = None
 
-creator.create("FitnessMax", base.Fitness, weights=(1.0, -0.002, -exp(-no_qb)))
+if t_count:
+    creator.create("FitnessMax", base.Fitness, weights=(1.0, -0.002, -exp(-no_qb)))
+else:
+    creator.create("FitnessMax", base.Fitness, weights=(1.0,))
 creator.create("Individual", list, fitness=creator.FitnessMax)
 
 toolbox = base.Toolbox()

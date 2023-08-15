@@ -3,14 +3,16 @@ import subprocess as sp
 import os
 import base64
 import gc
+import matplotlib.pyplot as plt
+from SettingsGUI import additional_settings
 from ast import literal_eval
-from __utilities__ import draw_circuit, plot_hist, plot_city, img_resize, img_combine
+from __utilities__ import draw_circuit, plot_hist, plot_city, img_resize, img_combine, visualise
 from __statecreation___ import poisson
 from qiskit.quantum_info import random_statevector, Statevector
 from pandas import DataFrame
 from qiskit_ibm_provider import IBMProvider
-import matplotlib.pyplot as plt
 from matplotlib import rcParams
+from PIL import Image
 
 # IBMProvider.save_account(token="MY_API_TOKEN", overwrite=True)
 
@@ -27,50 +29,42 @@ selList = ['selBest', 'selTournament', 'selRoulette', 'selRandom', 'selWorst', '
 if not os.path.exists('./circuitDiagrams/'):
     os.mkdir('./circuitDiagrams/')
 
-layout = [[PyGUI.Text('Genetic Quantum Circuit Synthesizer For State Preperation', font=heading_font, background_color=bckgrnd_col,
+layout = [[PyGUI.Menu([['File', ['Visualise Solution', 'Exit']], ['Settings', ['Additional Settings']],
+                       ['Help', ['General Help', 'About']]])],
+          [PyGUI.Text('Genetic Quantum Circuit Synthesizer For State Preperation', font=heading_font,
+                      background_color=bckgrnd_col,
                       text_color=txt_col)],
           [PyGUI.HSeparator(color=txt_col)],
           [PyGUI.Push(background_color=bckgrnd_col)],
           [PyGUI.Text('GENERATION:', background_color=bckgrnd_col, text_color=txt_col, font=body_font),
-           PyGUI.Text('', background_color=bckgrnd_col, text_color=txt_col, font=body_font, key='-GEN-'),
-           PyGUI.Push(background_color=bckgrnd_col),
-           PyGUI.Checkbox(":SET SEED", background_color=bckgrnd_col, checkbox_color=txt_col, text_color=txt_col,
-                          font=body_font, key='-SSEED-', default=True)],
+           PyGUI.Text('', background_color=bckgrnd_col, text_color=txt_col, font=body_font, key='-GEN-')],
           [PyGUI.Text('BEST FITNESS:', background_color=bckgrnd_col, text_color=txt_col, font=body_font),
-           PyGUI.Text('', background_color=bckgrnd_col, text_color=txt_col, font=body_font, key='-BF-'),
-           PyGUI.Push(background_color=bckgrnd_col),
-           PyGUI.Checkbox(":NOISY SIMULATION", background_color=bckgrnd_col, checkbox_color=txt_col, text_color=txt_col,
-                          font=body_font, key='-SNOISE-', default=False)],
+           PyGUI.Text('', background_color=bckgrnd_col, text_color=txt_col, font=body_font, key='-BF-')],
           [PyGUI.Text('POPULATION SIZE:', background_color=bckgrnd_col, text_color=txt_col, font=body_font),
-           PyGUI.InputText(background_color=bckgrnd_col, text_color=txt_col, font=body_font, default_text="100",
+           PyGUI.InputText(size=(20, 1), background_color=bckgrnd_col, text_color=txt_col, font=body_font,
+                           default_text="100",
                            border_width=1, key='-POPSIZE-'),
-           PyGUI.Push(background_color=bckgrnd_col),
-           PyGUI.Checkbox(":OPTIMISE T-COUNT", background_color=bckgrnd_col, checkbox_color=txt_col, text_color=txt_col,
-                          font=body_font, key='-STCOUNT-', default=True)],
+           PyGUI.Push(background_color=bckgrnd_col)],
           [PyGUI.Text('NO. OF GENERATIONS:', background_color=bckgrnd_col, text_color=txt_col, font=body_font),
-           PyGUI.InputText(background_color=bckgrnd_col, text_color=txt_col, font=body_font, default_text="30000",
-                           border_width=1, key='-NGENS-'),
-           PyGUI.Push(background_color=bckgrnd_col),
-           PyGUI.Spin([i for i in range(1, 10)], initial_value=3, size=5, key='-NOQB-'),
-           PyGUI.Text(':NO. OF QUBITS', background_color=bckgrnd_col, text_color=txt_col, font=body_font)],
+           PyGUI.InputText(size=(17, 1), background_color=bckgrnd_col, text_color=txt_col, font=body_font,
+                           default_text="30000",
+                           border_width=1, key='-NGENS-')],
           [PyGUI.Text('CROSSOVER PROB.:', background_color=bckgrnd_col, text_color=txt_col, font=body_font),
-           PyGUI.InputText(background_color=bckgrnd_col, text_color=txt_col, font=body_font, default_text="0.5",
+           PyGUI.InputText(size=(20, 1), background_color=bckgrnd_col, text_color=txt_col, font=body_font,
+                           default_text="0.5",
                            border_width=1, key='-CXPB-'),
-           PyGUI.Push(background_color=bckgrnd_col),
-           PyGUI.Spin([i for i in range(5)], initial_value=0, size=5, key='-NOANCI-'),
-           PyGUI.Text(':NO. OF ANCILLAE', background_color=bckgrnd_col, text_color=txt_col, font=body_font)],
+           PyGUI.Push(background_color=bckgrnd_col)],
           [PyGUI.Text('MUTATION PROB.:', background_color=bckgrnd_col, text_color=txt_col, font=body_font),
-           PyGUI.InputText(background_color=bckgrnd_col, text_color=txt_col, font=body_font, default_text="0.5",
-                           border_width=1, key='-MUTPB-'),
-           PyGUI.Push(background_color=bckgrnd_col),
-           PyGUI.Checkbox(":POISSON STATEVECTOR", background_color=bckgrnd_col, checkbox_color=txt_col, text_color=txt_col, font=body_font, key='-POISV-', default=False)],
+           PyGUI.InputText(size=(21, 1), background_color=bckgrnd_col, text_color=txt_col, font=body_font,
+                           default_text="0.5",
+                           border_width=1, key='-MUTPB-')],
           [PyGUI.Text('CROSSOVER TYPE:', background_color=bckgrnd_col, text_color=txt_col, font=body_font),
-           PyGUI.Combo(cxList, size=(35, 20), text_color=txt_col,
+           PyGUI.Combo(cxList, size=(20, 1), text_color=txt_col,
                        background_color=bckgrnd_col, font=body_font, readonly=True, default_value='MessyOnePoint',
                        button_background_color=txt_col, button_arrow_color=bckgrnd_col, key='-CX-')],
           [PyGUI.Text('SELECTION TYPE:', background_color=bckgrnd_col, text_color=txt_col, font=body_font),
            PyGUI.Combo(selList,
-                       size=(35, 20), text_color=txt_col,
+                       size=(20, 1), text_color=txt_col,
                        background_color=bckgrnd_col, font=body_font, readonly=True, default_value='selBest',
                        button_background_color=txt_col, button_arrow_color=bckgrnd_col, key='-SEL-'),
            PyGUI.Push(background_color=bckgrnd_col),
@@ -102,12 +96,14 @@ if __name__ == "__main__":
     event, values = window.read(timeout=0)
 
     GA_proc, prev_hof, hof, backend = None, None, None, None
+    no_qb, no_anci, sseed, stcount, noisesim, visualisation, svtype = 3, 0, True, True, False, True, 'Random'
     gen, hof_list, hof_ind = [], [], []
     stop = False
     i = 1
 
+
     def sub_process():
-        if values['-SNOISE-']:
+        if noisesim:
             provider = IBMProvider()
             avail = [str(bckend.name) for bckend in provider.backends()]
             if 'ibm_lagos' in avail:
@@ -117,22 +113,23 @@ if __name__ == "__main__":
         else:
             bckend = None
 
-        if values['-POISV-']:
-            singular = poisson(round((int(values['-NOQB-'])**2)/2), int(values['-NOQB-']))
-        else:
-            if values['-SSEED-']:
-                singular = random_statevector(tuple(2 for _ in range(values['-NOQB-'])), seed=2)
+        if svtype == 'Poisson':
+            singular = poisson(((2**int(no_qb)) / 4), int(no_qb))
+        elif svtype == 'Random':
+            if sseed:
+                singular = random_statevector(tuple(2 for _ in range(no_qb)), seed=2)
             else:
-                singular = random_statevector(tuple(2 for _ in range(values['-NOQB-'])))
-        plot_city(singular, values['-NOQB-'], "desiredState.png", int(values["-SNOISE-"]))
+                singular = random_statevector(tuple(2 for _ in range(no_qb)))
+        plot_city(singular, no_qb, "desiredState.png", int(noisesim))
         print(singular)
-        if values['-NOQB-'] <= values['-NOANCI-']:
+        if no_qb <= no_anci:
             return None, None
         else:
             return sp.Popen(
                 ['python3', './__main__.py', f'{values["-POPSIZE-"]}', f'{values["-NGENS-"]}', f'{values["-CXPB-"]}',
-                 f'{values["-MUTPB-"]}', f'{values["-CX-"]}', f'{values["-SEL-"]}', f'{values["-SSEED-"]}',
-                 f'{values["-NOQB-"]+values["-NOANCI-"]}', f'{[x for x in singular.data]}', f'{int(values["-SNOISE-"])}', f'{int(values["-STCOUNT-"])}', f'{int(values["-NOANCI-"])}'],
+                 f'{values["-MUTPB-"]}', f'{values["-CX-"]}', f'{values["-SEL-"]}', f'{sseed}',
+                 f'{no_qb + no_anci}', f'{[x for x in singular.data]}',
+                 f'{int(noisesim)}', f'{int(stcount)}', f'{int(no_anci)}'],
                 stdout=sp.PIPE,
                 universal_newlines=True), bckend
 
@@ -145,29 +142,21 @@ if __name__ == "__main__":
 
         elif event == 'START':
             i = 1
-            window['-NOQB-'].update(readonly=True)
-            window['-NOANCI-'].update(readonly=True)
-            window['-NOQB-'].update(disabled=True)
-            window['-NOANCI-'].update(disabled=True)
-            window['-SSEED-'].update(disabled=True)
-            window['-SNOISE-'].update(disabled=True)
-            window['-STCOUNT-'].update(disabled=True)
-            window['-POISV-'].update(disabled=True)
             if GA_proc is not None:
                 GA_proc.terminate()
             GA_proc, backend = sub_process()
 
         elif event == 'STOP' and GA_proc is not None:
-            window['-NOQB-'].update(readonly=False)
-            window['-NOANCI-'].update(readonly=False)
-            window['-NOQB-'].update(disabled=False)
-            window['-NOANCI-'].update(disabled=False)
-            window['-SSEED-'].update(disabled=False)
-            window['-SNOISE-'].update(disabled=False)
-            window['-STCOUNT-'].update(disabled=False)
-            window['-POISV-'].update(disabled=False)
             GA_proc.terminate()
             GA_proc = None
+
+        elif event == 'Additional Settings' and GA_proc is None:
+            no_qb, no_anci, sseed, stcount, noisesim, visualisation, svtype = additional_settings(no_qb, no_anci, sseed, stcount, noisesim, visualisation, svtype)
+
+        elif event == 'Visualise Solution' and hof is not None:
+            visualise(hof, no_qb, no_anci, backend)
+            Image.open('./circuitDiagrams/hof_Diagram.png').show()
+            Image.open('./circuitDiagrams/combined_img.png').show()
 
         if GA_proc is not None:
             line = GA_proc.stdout.readline()
@@ -182,7 +171,6 @@ if __name__ == "__main__":
                 hof = literal_eval(line[4:-1])
                 hof_list.append(hof[0])
                 hof_ind.append(hof[1])
-                window['-BF-'].update(f'{hof[0]}  ~~~  CIRCUIT LENGTH:{len(hof[1])}')
                 if hof[0] >= 100:
                     GA_proc.terminate()
                     GA_proc = None
@@ -195,8 +183,9 @@ if __name__ == "__main__":
                 if not os.path.exists(f'./evaluations/selections/{values["-SEL-"]}'):
                     os.mkdir(f'./evaluations/selections/{values["-SEL-"]}')
                 df = DataFrame({'Generation': gen, 'HOFFitness': hof_list, 'HOFInd': hof_ind})
-                df.to_csv(f'./evaluations/selections/{values["-SEL-"]}/{values["-CXPB-"]}-{values["-MUTPB-"]}-{values["-CX-"]}-{i}.csv',
-                          index=False)
+                df.to_csv(
+                    f'./evaluations/selections/{values["-SEL-"]}/{values["-CXPB-"]}-{values["-MUTPB-"]}-{values["-CX-"]}-{i}.csv',
+                    index=False)
                 gen.clear()
                 hof_ind.clear()
                 hof_list.clear()
@@ -206,14 +195,12 @@ if __name__ == "__main__":
                     GA_proc = sub_process()
 
         if prev_hof != hof:
-            draw_circuit(hof[1], values['-NOQB-']+values['-NOANCI-'], "hof_Diagram.png", values['-NOANCI-'])
-            plot_city(hof[1], values['-NOQB-']+values['-NOANCI-'], "hof_City.png", values['-NOANCI-'], backend)
-            img_resize("./circuitDiagrams/hof_Diagram", 4)
-            img_combine("./circuitDiagrams/desiredState", "./circuitDiagrams/hof_City")
-            img_resize("./circuitDiagrams/combined_img", 2)
-            window['-CD-'].update(filename="./circuitDiagrams/hof_Diagram_resized.png")
-            window['-HG-'].update(filename="./circuitDiagrams/combined_img_resized.png")
+            if visualisation:
+                visualise(hof, no_qb, no_anci, backend)
+                window['-CD-'].update(filename="./circuitDiagrams/hof_Diagram_resized.png")
+                window['-HG-'].update(filename="./circuitDiagrams/combined_img_resized.png")
             window['-LIST-'].update(hof[1])
+            window['-BF-'].update(f'{hof[0]}  ~~~  CIRCUIT LENGTH:{len(hof[1])}')
             gc.collect()
 
         prev_hof = hof

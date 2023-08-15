@@ -96,6 +96,15 @@ def evaluate(individual, no_qb, statevector, t_count, ancillae, noise=None):
         return state_fidelity(result, statevector, validate=False),
 
 
+def visualise(hof, no_qb, no_anci, backend):
+    draw_circuit(hof[1], no_qb + no_anci, "hof_Diagram.png", no_anci)
+    plot_city(hof[1], no_qb + no_anci, "hof_City.png", no_anci, backend)
+    img_resize("./circuitDiagrams/hof_Diagram", 4)
+    img_combine("./circuitDiagrams/desiredState", "./circuitDiagrams/hof_City")
+    img_resize("./circuitDiagrams/combined_img", 2)
+    return
+
+
 def draw_circuit(individual, no_qb, filename, ancillae):
     circuit = circuit_builder(individual, no_qb, ancillae)
     circuit.draw(output="mpl", filename=f'./circuitDiagrams/{filename}')
