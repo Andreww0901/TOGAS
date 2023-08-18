@@ -24,7 +24,7 @@ bckgrnd_col = 'White'
 txt_col = 'Black'
 
 cxList = ['OnePointCX', 'TwoPointCX', 'MessyOnePoint', 'UniformCX']
-selList = ['selBest', 'selTournament', 'selRoulette', 'selRandom', 'selWorst', 'selLexicase']
+selList = ['selBest', 'selTournament', 'selRoulette', 'selRandom', 'selWorst', 'selLexicase', 'selDoubleTournament']
 
 if not os.path.exists('./circuitDiagrams/'):
     os.mkdir('./circuitDiagrams/')
@@ -114,7 +114,7 @@ if __name__ == "__main__":
             bckend = None
 
         if svtype == 'Poisson':
-            singular = poisson(((2**int(no_qb)) / 4), int(no_qb))
+            singular = poisson(((2**int(no_qb)) / 6), int(no_qb))
         elif svtype == 'Random':
             if sseed:
                 singular = random_statevector(tuple(2 for _ in range(no_qb)), seed=2)
@@ -200,7 +200,7 @@ if __name__ == "__main__":
                 window['-CD-'].update(filename="./circuitDiagrams/hof_Diagram_resized.png")
                 window['-HG-'].update(filename="./circuitDiagrams/combined_img_resized.png")
             window['-LIST-'].update(hof[1])
-            window['-BF-'].update(f'{hof[0]}  ~~~  CIRCUIT LENGTH:{len(hof[1])}')
+            window['-BF-'].update(f'{hof[0]} ~ GATE COUNT:{len(hof[1])}')
             gc.collect()
 
         prev_hof = hof

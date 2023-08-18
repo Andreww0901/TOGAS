@@ -114,6 +114,8 @@ if __name__ == "__main__":
             toolbox.register("select", tools.selWorst)
         case "selLexicase":
             toolbox.register("select", tools.selLexicase)
+        case "selDoubleTournament":
+            toolbox.register("select", tools.selDoubleTournament, fitness_size=4, parsimony_size=1.5, fitness_first=True)
 
     toolbox.register("mutate", __mutations__.mixed_mutation, no_qb=no_qb)
     _genetic_algorithm()
