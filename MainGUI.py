@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from SettingsGUI import additional_settings
 from ast import literal_eval
 from __utilities__ import draw_circuit, plot_hist, plot_city, img_resize, img_combine, visualise
-from __statecreation___ import poisson
+from __statecreation___ import poisson, w
 from qiskit.quantum_info import random_statevector, Statevector
 from pandas import DataFrame
 from qiskit_ibm_provider import IBMProvider
@@ -114,7 +114,9 @@ if __name__ == "__main__":
             bckend = None
 
         if svtype == 'Poisson':
-            singular = poisson(((2**int(no_qb)) / 6), int(no_qb))
+            singular = poisson(((2**int(no_qb)) / 2), int(no_qb))
+        elif svtype == 'W':
+            singular = w(no_qb)
         elif svtype == 'Random':
             if sseed:
                 singular = random_statevector(tuple(2 for _ in range(no_qb)), seed=2)
@@ -157,6 +159,7 @@ if __name__ == "__main__":
             visualise(hof, no_qb, no_anci, backend)
             Image.open('./circuitDiagrams/hof_Diagram.png').show()
             Image.open('./circuitDiagrams/combined_img.png').show()
+            Image.open('./circuitDiagrams/visu_hist.png').show()
 
         if GA_proc is not None:
             line = GA_proc.stdout.readline()

@@ -83,9 +83,19 @@ def optimise(individual):
                     individual.pop(x)
                     individual.pop(x)
             case "CNOT":
-                if individual[x + 1][0] == 'CNOT' and individual[x + 1][1][0] == individual[x][1][0] and individual[x + 1][1][1] == individual[x][1][1]:
-                    individual.pop(x)
-                    individual.pop(x)
+                j = x + 1
+                while j < len(individual):
+                    if individual[j][0] != "CNOT" and (individual[j][1][0] in individual[x][1]):
+                        break
+                    elif individual[j][0] == "CNOT":
+                        if individual[j][1][0] == individual[x][1][1] or individual[j][1][1] == individual[x][1][0]:
+                            break
+                        elif individual[j] == individual[x]:
+                            print(f'{individual[x]}{x}  -  {individual[j]}{j}')
+                            individual.pop(j)
+                            individual.pop(x)
+                            break
+                    j += 1
         x += 1
     return individual,
 
@@ -107,7 +117,7 @@ def sequence_insertion(individual, no_qb):
 def sequence_deletion(individual):
     if len(individual) >= 1:
         start = random.randrange(len(individual))
-        for _ in range(random.randrange(len(individual)-start)):
+        for _ in range(random.randrange(len(individual) - start)):
             individual.pop(start)
     return individual,
 

@@ -97,7 +97,7 @@ def evaluate(individual, no_qb, statevector, t_count, ancillae, noise=None):
 
 
 def visualise(hof, no_qb, no_anci, backend):
-    draw_circuit(hof[1], no_qb + no_anci, "hof_Diagram.png", no_anci)
+    draw_circuit(hof[1], no_qb + no_anci, "hof_Diagram.png", no_anci, hist=True)
     plot_city(hof[1], no_qb + no_anci, "hof_City.png", no_anci, backend)
     img_resize("./circuitDiagrams/hof_Diagram", 4)
     img_combine("./circuitDiagrams/desiredState", "./circuitDiagrams/hof_City")
@@ -105,8 +105,14 @@ def visualise(hof, no_qb, no_anci, backend):
     return
 
 
-def draw_circuit(individual, no_qb, filename, ancillae):
+def draw_circuit(individual, no_qb, filename, ancillae, hist=False):
     circuit = circuit_builder(individual, no_qb, ancillae)
+    if hist:
+        simulator = Aer.get_backend('aer_simulator')
+        job = simulator.run(circuit, shots=100000)
+        results = job.result()
+        counts = results.get_counts(circuit)
+        plot_histogram(counts, filename=f'./circuitDiagrams/visu_hist')
     circuit.draw(output="mpl", filename=f'./circuitDiagrams/{filename}')
 
 
