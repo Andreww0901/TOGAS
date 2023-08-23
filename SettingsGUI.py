@@ -23,7 +23,7 @@ def layout():
             [PyGUI.Text('SET SEED:', background_color=bckgrnd_col, text_color=txt_col, font=body_font),
              PyGUI.Checkbox("", background_color=bckgrnd_col, checkbox_color=txt_col, text_color=txt_col,
                             font=body_font,
-                            key='-SSEED-', default=True)],
+                            key='-SSEED-', default=False)],
             [PyGUI.Text('OPTIMISE FOR T-COUNT:', background_color=bckgrnd_col, text_color=txt_col, font=body_font),
              PyGUI.Checkbox("", background_color=bckgrnd_col, checkbox_color=txt_col, text_color=txt_col,
                             font=body_font,

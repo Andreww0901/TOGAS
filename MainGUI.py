@@ -103,6 +103,7 @@ if __name__ == "__main__":
 
 
     def sub_process():
+        global poisson_
         if noisesim:
             provider = IBMProvider()
             avail = [str(bckend.name) for bckend in provider.backends()]
@@ -115,6 +116,7 @@ if __name__ == "__main__":
 
         if svtype == 'Poisson':
             singular = poisson(((2**int(no_qb)) / 2), int(no_qb))
+            poisson_ = True
         elif svtype == 'W':
             singular = w(no_qb)
         elif svtype == 'Random':
@@ -131,7 +133,7 @@ if __name__ == "__main__":
                 ['python3', './__main__.py', f'{values["-POPSIZE-"]}', f'{values["-NGENS-"]}', f'{values["-CXPB-"]}',
                  f'{values["-MUTPB-"]}', f'{values["-CX-"]}', f'{values["-SEL-"]}', f'{sseed}',
                  f'{no_qb + no_anci}', f'{[x for x in singular.data]}',
-                 f'{int(noisesim)}', f'{int(stcount)}', f'{int(no_anci)}'],
+                 f'{int(noisesim)}', f'{int(stcount)}', f'{int(no_anci)}', f'{int(poisson_)}'],
                 stdout=sp.PIPE,
                 universal_newlines=True), bckend
 
@@ -143,6 +145,7 @@ if __name__ == "__main__":
             break
 
         elif event == 'START':
+            poisson_ = False
             i = 1
             if GA_proc is not None:
                 GA_proc.terminate()
@@ -159,7 +162,7 @@ if __name__ == "__main__":
             visualise(hof, no_qb, no_anci, backend)
             Image.open('./circuitDiagrams/hof_Diagram.png').show()
             Image.open('./circuitDiagrams/combined_img.png').show()
-            Image.open('./circuitDiagrams/visu_hist.png').show()
+            Image.open('./circuitDiagrams/hof_Hist.png').show()
 
         if GA_proc is not None:
             line = GA_proc.stdout.readline()
@@ -201,7 +204,10 @@ if __name__ == "__main__":
             if visualisation:
                 visualise(hof, no_qb, no_anci, backend)
                 window['-CD-'].update(filename="./circuitDiagrams/hof_Diagram_resized.png")
-                window['-HG-'].update(filename="./circuitDiagrams/combined_img_resized.png")
+                if poisson_:
+                    window['-HG-'].update(filename="./circuitDiagrams/hof_Hist_resized.png")
+                else:
+                    window['-HG-'].update(filename="./circuitDiagrams/combined_img_resized.png")
             window['-LIST-'].update(hof[1])
             window['-BF-'].update(f'{hof[0]} ~ GATE COUNT:{len(hof[1])}')
             gc.collect()

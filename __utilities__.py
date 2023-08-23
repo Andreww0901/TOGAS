@@ -11,6 +11,7 @@ from itertools import product
 from numpy.random import poisson
 from numpy import abs, vdot
 from PIL import Image
+from collections import Counter
 
 universal_set = ["CNOT", "TGate", "TDGGate", "XGate", "SXGate"]
 
@@ -96,23 +97,44 @@ def evaluate(individual, no_qb, statevector, t_count, ancillae, noise=None):
         return state_fidelity(result, statevector, validate=False),
 
 
+def count_evaluate(individual, no_qb, t_count, ancillae, des_counts, noise=None):
+    circuit = circuit_builder(individual, no_qb, ancillae)
+    if noise:
+        simulator = AerSimulator.from_backend(noise)
+    else:
+        simulator = Aer.get_backend('aer_simulator')
+    qobj = transpile(circuit, simulator)
+    job = simulator.run(qobj, shots=10000)
+    results = job.result()
+    counts = results.get_counts(circuit)
+    k = Counter(des_counts) - Counter(counts)
+    total = sum(k.values())/10000
+    if t_count:
+        no_tg = 0
+        no_cnot = 0
+        for x in range(len(individual)):
+            if individual[x][0] == 'TGate' or individual[x][0] == 'TDGGate':
+                no_tg += 1
+            elif individual[x][0] == 'CNOT':
+                no_cnot += 1
+        return total, no_tg, no_cnot
+    else:
+        return total,
+
+
 def visualise(hof, no_qb, no_anci, backend):
-    draw_circuit(hof[1], no_qb + no_anci, "hof_Diagram.png", no_anci, hist=True)
+    draw_circuit(hof[1], no_qb + no_anci, "hof_Diagram.png", no_anci)
+    plot_hist(hof[1], no_qb, "hof_Hist.png")
+    img_resize("./circuitDiagrams/hof_Hist", 1)
     plot_city(hof[1], no_qb + no_anci, "hof_City.png", no_anci, backend)
-    img_resize("./circuitDiagrams/hof_Diagram", 4)
     img_combine("./circuitDiagrams/desiredState", "./circuitDiagrams/hof_City")
     img_resize("./circuitDiagrams/combined_img", 2)
+    img_resize("./circuitDiagrams/hof_Diagram", 4)
     return
 
 
-def draw_circuit(individual, no_qb, filename, ancillae, hist=False):
+def draw_circuit(individual, no_qb, filename, ancillae):
     circuit = circuit_builder(individual, no_qb, ancillae)
-    if hist:
-        simulator = Aer.get_backend('aer_simulator')
-        job = simulator.run(circuit, shots=100000)
-        results = job.result()
-        counts = results.get_counts(circuit)
-        plot_histogram(counts, filename=f'./circuitDiagrams/visu_hist')
     circuit.draw(output="mpl", filename=f'./circuitDiagrams/{filename}')
 
 

@@ -91,7 +91,6 @@ def optimise(individual):
                         if individual[j][1][0] == individual[x][1][1] or individual[j][1][1] == individual[x][1][0]:
                             break
                         elif individual[j] == individual[x]:
-                            print(f'{individual[x]}{x}  -  {individual[j]}{j}')
                             individual.pop(j)
                             individual.pop(x)
                             break
