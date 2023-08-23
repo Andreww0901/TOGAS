@@ -71,17 +71,45 @@ def optimise(individual):
     while x < len(individual)-1:
         match individual[x][0]:
             case "TGate":
-                if individual[x + 1][0] == 'TDGGate' and individual[x + 1][1][0] == individual[x][1][0]:
-                    individual.pop(x)
-                    individual.pop(x)
+                j = x + 1
+                while j < len(individual):
+                    if individual[j][0] != 'TDGGate' and individual[x][1][0] in individual[j][1]:
+                        break
+                    elif individual[j][0] == 'TDGGate' and individual[j][1][0] == individual[x][1][0]:
+                        individual.pop(j)
+                        individual.pop(x)
+                        break
+                    j += 1
             case "TDGGate":
-                if individual[x + 1][0] == 'TGate' and individual[x + 1][1][0] == individual[x][1][0]:
-                    individual.pop(x)
-                    individual.pop(x)
+                j = x + 1
+                while j < len(individual):
+                    if individual[j][0] != 'TGate' and individual[x][1][0] in individual[j][1]:
+                        break
+                    elif individual[j][0] == 'TGate' and individual[j][1][0] == individual[x][1][0]:
+                        individual.pop(j)
+                        individual.pop(x)
+                        break
+                    j += 1
             case "XGate":
-                if individual[x + 1][0] == 'XGate' and individual[x + 1][1][0] == individual[x][1][0]:
-                    individual.pop(x)
-                    individual.pop(x)
+                j = x + 1
+                while j < len(individual):
+                    if individual[j][0] != 'XGate' and individual[x][1][0] in individual[j][1]:
+                        break
+                    elif individual[j][0] == 'XGate' and individual[j][1][0] == individual[x][1][0]:
+                        individual.pop(j)
+                        individual.pop(x)
+                        break
+                    j += 1
+            case "SXGate":
+                j = x + 1
+                while j < len(individual):
+                    if individual[j][0] != 'SXGate' and individual[x][1][0] in individual[j][1]:
+                        break
+                    elif individual[j][0] == 'SXGate' and individual[j][1][0] == individual[x][1][0]:
+                        individual.pop(j)
+                        individual[x] = ['XGate', [individual[x][1][0]]]
+                        break
+                    j += 1
             case "CNOT":
                 j = x + 1
                 while j < len(individual):
