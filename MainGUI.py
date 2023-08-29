@@ -96,14 +96,13 @@ if __name__ == "__main__":
     event, values = window.read(timeout=0)
 
     GA_proc, prev_hof, hof, backend = None, None, None, None
-    no_qb, no_anci, sseed, stcount, noisesim, visualisation, svtype = 3, 0, True, True, False, True, 'Random'
+    no_qb, no_anci, sseed, stcount, noisesim, visualisation, svtype, phase_info = 3, 0, True, True, False, True, 'Random', False
     gen, hof_list, hof_ind = [], [], []
     stop = False
     i = 1
 
 
     def sub_process():
-        global poisson_
         if noisesim:
             provider = IBMProvider()
             avail = [str(bckend.name) for bckend in provider.backends()]
@@ -116,7 +115,6 @@ if __name__ == "__main__":
 
         if svtype == 'Poisson':
             singular = poisson(((2**int(no_qb)) / 2), int(no_qb))
-            poisson_ = True
         elif svtype == 'W':
             singular = w(no_qb)
         elif svtype == 'Random':
@@ -133,7 +131,7 @@ if __name__ == "__main__":
                 ['python3', './__main__.py', f'{values["-POPSIZE-"]}', f'{values["-NGENS-"]}', f'{values["-CXPB-"]}',
                  f'{values["-MUTPB-"]}', f'{values["-CX-"]}', f'{values["-SEL-"]}', f'{sseed}',
                  f'{no_qb + no_anci}', f'{[x for x in singular.data]}',
-                 f'{int(noisesim)}', f'{int(stcount)}', f'{int(no_anci)}', f'{int(poisson_)}'],
+                 f'{int(noisesim)}', f'{int(stcount)}', f'{int(no_anci)}', f'{int(phase_info)}'],
                 stdout=sp.PIPE,
                 universal_newlines=True), bckend
 
@@ -156,7 +154,7 @@ if __name__ == "__main__":
             GA_proc = None
 
         elif event == 'Additional Settings' and GA_proc is None:
-            no_qb, no_anci, sseed, stcount, noisesim, visualisation, svtype = additional_settings(no_qb, no_anci, sseed, stcount, noisesim, visualisation, svtype)
+            no_qb, no_anci, sseed, stcount, noisesim, visualisation, svtype, phase_info = additional_settings(no_qb, no_anci, sseed, stcount, noisesim, visualisation, svtype, phase_info)
 
         elif event == 'Visualise Solution' and hof is not None:
             visualise(hof, no_qb, no_anci, backend)
@@ -204,7 +202,7 @@ if __name__ == "__main__":
             if visualisation:
                 visualise(hof, no_qb, no_anci, backend)
                 window['-CD-'].update(filename="./circuitDiagrams/hof_Diagram_resized.png")
-                if poisson_:
+                if phase_info:
                     window['-HG-'].update(filename="./circuitDiagrams/hof_Hist_resized.png")
                 else:
                     window['-HG-'].update(filename="./circuitDiagrams/combined_img_resized.png")

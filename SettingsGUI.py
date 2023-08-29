@@ -37,6 +37,10 @@ def layout():
              PyGUI.Checkbox("", background_color=bckgrnd_col, checkbox_color=txt_col, text_color=txt_col,
                             font=body_font,
                             key='-VISUA-', default=True)],
+            [PyGUI.Text('IGNORE PHASE INFORMATION:', background_color=bckgrnd_col, text_color=txt_col, font=body_font),
+             PyGUI.Checkbox("", background_color=bckgrnd_col, checkbox_color=txt_col, text_color=txt_col,
+                            font=body_font,
+                            key='-PHASEINFO-', default=True)],
             [PyGUI.Text('STATEVECTOR TYPE:', background_color=bckgrnd_col, text_color=txt_col, font=body_font),
              PyGUI.Combo(statevectors, size=(15, 1), text_color=txt_col,
                          background_color=bckgrnd_col, font=body_font, readonly=True, default_value='Random',
@@ -45,11 +49,11 @@ def layout():
             [PyGUI.Button('SAVE & CLOSE', font=body_font, button_color=(bckgrnd_col, '#0088ff'), border_width=0)]]
 
 
-def additional_settings(no_qb, no_anci, sseed, stcount, noisesim, visualisation, svtype):
+def additional_settings(no_qb, no_anci, sseed, stcount, noisesim, visualisation, svtype, phase_info):
     window = PyGUI.Window('Additional Settings',
                           layout=layout(),
                           background_color=bckgrnd_col,
-                          size=(400, 325),
+                          size=(400, 350),
                           keep_on_top=True,
                           resizable=True,
                           finalize=True,
@@ -62,6 +66,7 @@ def additional_settings(no_qb, no_anci, sseed, stcount, noisesim, visualisation,
     window['-SNOISE-'].update(noisesim)
     window['-VISUA-'].update(visualisation)
     window['-SVSEL-'].update(svtype)
+    window['-PHASEINFO-'].update(phase_info)
     s_c = False
     while True:
         event, values = window.read(timeout=1)
@@ -76,6 +81,6 @@ def additional_settings(no_qb, no_anci, sseed, stcount, noisesim, visualisation,
     window.close()
     if s_c:
         return values['-NOQB-'], values['-NOANCI-'], values['-SSEED-'], values['-STCOUNT-'], values['-SNOISE-'], \
-            values['-VISUA-'], values['-SVSEL-']
+            values['-VISUA-'], values['-SVSEL-'], values['-PHASEINFO-']
     else:
-        return no_qb, no_anci, sseed, stcount, noisesim, visualisation, svtype
+        return no_qb, no_anci, sseed, stcount, noisesim, visualisation, svtype, phase_info

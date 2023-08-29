@@ -125,7 +125,7 @@ def count_evaluate(individual, no_qb, t_count, ancillae, des_counts, noise=None)
 def visualise(hof, no_qb, no_anci, backend):
     draw_circuit(hof[1], no_qb + no_anci, "hof_Diagram.png", no_anci)
     plot_hist(hof[1], no_qb, "hof_Hist.png")
-    img_resize("./circuitDiagrams/hof_Hist", 1)
+    img_resize("./circuitDiagrams/hof_Hist", 1.025)
     plot_city(hof[1], no_qb + no_anci, "hof_City.png", no_anci, backend)
     img_combine("./circuitDiagrams/desiredState", "./circuitDiagrams/hof_City")
     img_resize("./circuitDiagrams/combined_img", 2)
