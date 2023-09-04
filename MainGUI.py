@@ -96,7 +96,7 @@ if __name__ == "__main__":
     event, values = window.read(timeout=0)
 
     GA_proc, prev_hof, hof, backend = None, None, None, None
-    no_qb, no_anci, sseed, stcount, noisesim, visualisation, svtype, phase_info = 6, 0, False, True, False, True, 'Poisson', False
+    no_qb, no_anci, sseed, stcount, noisesim, visualisation, svtype, phase_info = 6, 0, False, True, False, False, 'Poisson', False
     gen, hof_list, hof_ind = [], [], []
     stop = False
     i = 1

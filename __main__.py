@@ -10,7 +10,6 @@ from deap import creator, base, tools, algorithms
 from qiskit import QuantumCircuit, Aer, transpile
 from qiskit.quantum_info import Statevector
 from qiskit_ibm_provider import IBMProvider
-from qiskit_aer import AerSimulator
 from ast import literal_eval
 from math import exp
 
@@ -118,7 +117,7 @@ def _genetic_algorithm():
         print(f'GEN:{generation}')
         print(f'HOF:{hof}')
         print(f'AVGLEN:{avg_len/len(population)}')
-    # print(f'END')
+    print(f'END')
 
 
 if __name__ == "__main__":

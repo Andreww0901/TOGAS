@@ -2,11 +2,10 @@ import random
 from math import pi, sqrt, floor, exp
 from cmath import isclose
 from qiskit import QuantumCircuit, assemble, Aer, transpile
-from qiskit.providers.aer import QasmSimulator
 from qiskit.providers.fake_provider import FakeVigo
+from qiskit_aer import AerSimulator
 from qiskit.visualization import plot_histogram
 from qiskit.quantum_info import state_fidelity, Statevector, random_statevector
-from qiskit_aer import AerSimulator
 from itertools import product
 from numpy.random import poisson
 from numpy import abs, vdot
@@ -126,7 +125,7 @@ def count_evaluate(individual, no_qb, t_count, ancillae, des_counts, noise=None)
 
 def visualise(hof, no_qb, no_anci, backend):
     draw_circuit(hof[1], no_qb + no_anci, "hof_Diagram.png", no_anci)
-    plot_hist(hof[1], no_qb, "hof_Hist.png")
+    plot_hist(hof[1], no_qb + no_anci, "hof_Hist.png")
     img_resize("./circuitDiagrams/hof_Hist", 1.025)
     plot_city(hof[1], no_qb + no_anci, "hof_City.png", no_anci, backend)
     img_combine("./circuitDiagrams/desiredState", "./circuitDiagrams/hof_City")
