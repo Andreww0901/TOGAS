@@ -96,7 +96,7 @@ if __name__ == "__main__":
     event, values = window.read(timeout=0)
 
     GA_proc, prev_hof, hof, backend = None, None, None, None
-    no_qb, no_anci, sseed, stcount, noisesim, visualisation, svtype, phase_info = 3, 0, True, True, False, True, 'Random', False
+    no_qb, no_anci, sseed, stcount, noisesim, visualisation, svtype, phase_info = 6, 0, False, True, False, True, 'Poisson', False
     gen, hof_list, hof_ind = [], [], []
     stop = False
     i = 1
@@ -207,7 +207,7 @@ if __name__ == "__main__":
                 else:
                     window['-HG-'].update(filename="./circuitDiagrams/combined_img_resized.png")
             window['-LIST-'].update(hof[1])
-            window['-BF-'].update(f'{hof[0]} ~ GATE COUNT:{len(hof[1])}')
+            window['-BF-'].update(f'{hof[0]} - GATE COUNT:{len(hof[1])}')
             gc.collect()
 
         prev_hof = hof

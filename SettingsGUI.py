@@ -40,10 +40,10 @@ def layout():
             [PyGUI.Text('IGNORE PHASE INFORMATION:', background_color=bckgrnd_col, text_color=txt_col, font=body_font),
              PyGUI.Checkbox("", background_color=bckgrnd_col, checkbox_color=txt_col, text_color=txt_col,
                             font=body_font,
-                            key='-PHASEINFO-', default=True)],
+                            key='-PHASEINFO-', default=False)],
             [PyGUI.Text('STATEVECTOR TYPE:', background_color=bckgrnd_col, text_color=txt_col, font=body_font),
              PyGUI.Combo(statevectors, size=(15, 1), text_color=txt_col,
-                         background_color=bckgrnd_col, font=body_font, readonly=True, default_value='Random',
+                         background_color=bckgrnd_col, font=body_font, readonly=True, default_value='Poisson',
                          button_background_color=txt_col, button_arrow_color=bckgrnd_col, key='-SVSEL-')],
             [PyGUI.VPush(background_color=bckgrnd_col)],
             [PyGUI.Button('SAVE & CLOSE', font=body_font, button_color=(bckgrnd_col, '#0088ff'), border_width=0)]]

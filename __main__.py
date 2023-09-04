@@ -41,7 +41,7 @@ else:
     weight = 1.0
 
 if t_count:
-    creator.create("FitnessMax", base.Fitness, weights=(weight, -0.002, -exp(-no_qb)))
+    creator.create("FitnessMax", base.Fitness, weights=(weight, -0.002, -exp(-no_qb), -exp(-no_qb)))
 else:
     creator.create("FitnessMax", base.Fitness, weights=(weight,))
 creator.create("Individual", list, fitness=creator.FitnessMax)

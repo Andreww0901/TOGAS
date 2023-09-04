@@ -13,7 +13,7 @@ from numpy import abs, vdot
 from PIL import Image
 from collections import Counter
 
-universal_set = ["CNOT", "TGate", "TDGGate", "XGate", "SXGate"]
+universal_set = ['HGate', 'SGate', 'CNOT', 'TGate']
 
 
 def ind_setup(no_qb):
@@ -48,6 +48,8 @@ def add_gates(circuit, individual):
                 circuit.h(gate[1])
             case "PGate":
                 circuit.rz(gate[1][1], gate[1][0])
+            case "SGate":
+                circuit.s(gate[1])
             case "TGate":
                 circuit.t(gate[1])
             case "TDGGate":
@@ -92,7 +94,7 @@ def evaluate(individual, no_qb, statevector, t_count, ancillae, noise=None):
                 no_tg += 1
             elif individual[x][0] == 'CNOT':
                 no_cnot += 1
-        return state_fidelity(result, statevector, validate=False), no_tg, no_cnot
+        return state_fidelity(result, statevector, validate=False), no_tg, no_cnot, len(individual)
     else:
         return state_fidelity(result, statevector, validate=False),
 

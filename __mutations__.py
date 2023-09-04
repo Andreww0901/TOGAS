@@ -69,6 +69,7 @@ def switch(individual, no_qb):
 def optimise(individual):
     x = 0
     while x < len(individual)-1:
+        removed = False
         match individual[x][0]:
             case "TGate":
                 j = x + 1
@@ -78,6 +79,7 @@ def optimise(individual):
                     elif individual[j][0] == 'TDGGate' and individual[j][1][0] == individual[x][1][0]:
                         individual.pop(j)
                         individual.pop(x)
+                        removed = True
                         break
                     j += 1
             case "TDGGate":
@@ -88,6 +90,7 @@ def optimise(individual):
                     elif individual[j][0] == 'TGate' and individual[j][1][0] == individual[x][1][0]:
                         individual.pop(j)
                         individual.pop(x)
+                        removed = True
                         break
                     j += 1
             case "XGate":
@@ -98,6 +101,7 @@ def optimise(individual):
                     elif individual[j][0] == 'XGate' and individual[j][1][0] == individual[x][1][0]:
                         individual.pop(j)
                         individual.pop(x)
+                        removed = True
                         break
                     j += 1
             case "SXGate":
@@ -121,9 +125,32 @@ def optimise(individual):
                         elif individual[j] == individual[x]:
                             individual.pop(j)
                             individual.pop(x)
+                            removed = True
                             break
                     j += 1
-        x += 1
+            case "SGate":
+                j = x + 1
+                indeces = [x]
+                i = 0
+                while j < len(individual):
+                    if individual[j][0] == 'SGate' and (individual[j][1][0] in individual[x][1]):
+                        i += 1
+                        indeces.append(j)
+                    elif individual[j] != 'SGate' and (individual[j][1][0] in individual[x][1]):
+                        break
+                    if i == 3:
+                        indeces.reverse()
+                        [individual.pop(k) for k in indeces]
+                        removed = True
+                        break
+                    j += 1
+        if removed:
+            if len(individual) > 4:
+                continue
+            else:
+                x += 1
+        else:
+            x += 1
     return individual,
 
 
