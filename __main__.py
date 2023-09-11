@@ -12,6 +12,7 @@ from qiskit.quantum_info import Statevector
 from qiskit_ibm_provider import IBMProvider
 from ast import literal_eval
 from math import exp
+from operator import attrgetter
 
 pop_size = int(sys.argv[1])
 no_gens = int(sys.argv[2])
@@ -35,12 +36,12 @@ else:
     backend = None
 
 if poisson_:
-    weight = -1.0
+    weight = -100
 else:
-    weight = 1.0
+    weight = 100
 
 if t_count:
-    creator.create("FitnessMax", base.Fitness, weights=(weight, -0.002, -exp(-no_qb), -exp(-no_qb)))
+    creator.create("FitnessMax", base.Fitness, weights=(weight, -1, -1, -1))
 else:
     creator.create("FitnessMax", base.Fitness, weights=(weight,))
 creator.create("Individual", list, fitness=creator.FitnessMax)
@@ -74,10 +75,7 @@ def _genetic_algorithm():
 
     population = toolbox.select(population, k=pop_size)
 
-    hof = [0, []]
-    if poisson_:
-        hof = [100, []]
-    best_ind = None
+    hof = [population[0].fitness.wvalues, population[0]]
 
     if os.path.exists('./avg_len.txt'):
         os.remove('./avg_len.txt')
@@ -90,29 +88,14 @@ def _genetic_algorithm():
         for ind, fit in zip(invalid_ind, fitnesses):
             ind.fitness.values = fit
 
-        population = toolbox.select(offspring, k=pop_size)
+        population = sorted(toolbox.select(offspring, k=pop_size), key=attrgetter('fitness'), reverse=True)
 
-        best_fitness = 0
         avg_len = 0
-        if poisson_:
-            best_fitness = 100
         for individual in population:
             avg_len += len(individual)
-            if poisson_:
-                if individual.fitness.values[0] < best_fitness:
-                    best_fitness, best_ind = individual.fitness.values[0], individual
-            else:
-                if individual.fitness.values[0] > best_fitness:
-                    best_fitness, best_ind = individual.fitness.values[0], individual
 
-        if poisson_:
-            if best_ind is not None and best_ind.fitness.values[0] < hof[0]:
-                hof[0] = best_ind.fitness.values[0]
-                hof[1] = best_ind
-        else:
-            if best_ind is not None and best_ind.fitness.values[0] > hof[0]:
-                hof[0] = best_ind.fitness.values[0]
-                hof[1] = best_ind
+        if population[0].fitness.wvalues[0] > hof[0][0]:
+            hof = [population[0].fitness.wvalues, population[0]]
 
         print(f'GEN:{generation}')
         print(f'HOF:{hof}')

@@ -68,7 +68,7 @@ def switch(individual, no_qb):
 
 def optimise(individual):
     x = 0
-    while x < len(individual)-1:
+    while x < len(individual) - 1:
         removed = False
         match individual[x][0]:
             case "TGate":
@@ -144,11 +144,20 @@ def optimise(individual):
                         removed = True
                         break
                     j += 1
+            case "HGate":
+                j = x + 1
+                while j < len(individual):
+                    if individual[j][0] != 'HGate' and individual[x][1][0] in individual[j][1]:
+                        break
+                    elif individual[j][0] == 'HGate' and individual[j][1][0] == individual[x][1][0]:
+                        individual.pop(j)
+                        individual.pop(x)
+                        removed = True
+                        break
+                    j += 1
+
         if removed:
-            if len(individual) > 4:
-                continue
-            else:
-                x += 1
+            continue
         else:
             x += 1
     return individual,

@@ -15,7 +15,7 @@ if __name__ == "__main__":
     for qb, state in product(no_qbs, states):
         match state:
             case 'Random':
-                singular = random_statevector(tuple(2 for _ in range(qb)), seed=2)
+                singular = random_statevector(tuple(2 for _ in range(qb)), seed=3)
             case 'Poisson':
                 singular = poisson(((2**int(qb)) / 2), int(qb))
             case 'W':
@@ -28,8 +28,8 @@ if __name__ == "__main__":
 
         start_time = time()
         subproc = sp.Popen(
-            ['python3', './__main__.py', f'150', f'25000', f'0.5',
-             f'0.5', f'MessyOnePoint', f'selBest', f'0',
+            ['python3', './__main__.py', f'150', f'30000', f'0.5',
+             f'0.25', f'MessyOnePoint', f'selBest', f'0',
              f'{qb}', f'{[x for x in singular.data]}',
              f'0', f'1', f'0', f'0'],
             stdout=sp.PIPE,
@@ -41,7 +41,7 @@ if __name__ == "__main__":
                 gens.append(line[4:-1])
             elif line.startswith('HOF:'):
                 hof = literal_eval(line[4:-1])
-                hof_fit_list.append(hof[0])
+                hof_fit_list.append(hof[0][0])
                 tcnt = 0
                 for gate in hof[1]:
                     if gate[0] == "TGate":
@@ -53,14 +53,19 @@ if __name__ == "__main__":
             elif line.startswith('END'):
                 break
             if len(gens) > 0 and len(hof) > 0:
-                sys.stdout.write(f'\rGeneration: {gens[-1]} - Best Fitness: {hof[0]} - TCount: {t_count[-1]} - Best Ind. Length: {length[-1]} - Average Ind. Length: {avg_len} {""*10}')
+                print(end='\x1b[2K')
+                sys.stdout.write(f'\r   Generation: {gens[-1]} - Best Fitness: {hof[0][0]} - TCount: {t_count[-1]} - Best Ind. Length: {length[-1]} - Average Ind. Length: {avg_len}')
                 sys.stdout.flush()
 
         end_time = time() - start_time
         gens.append(end_time)
         hof_fit_list.append(':TIME')
+        t_count.append('~~~')
+        length.append('~~~')
         data = {'Generation': gens, 'Fitness': hof_fit_list, 'TCount': t_count, 'Length': length}
         data_frame = pd.DataFrame(data)
         if not os.path.exists('./data'):
             os.mkdir('./data')
         data_frame.to_csv(f'./data/{qb}-Qubit-{state}.csv', index=False)
+        os.system('clear')
+
