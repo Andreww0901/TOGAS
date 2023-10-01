@@ -1,10 +1,7 @@
 import random
 import multiprocessing
 import sys
-import __utilities__
-import __mutations__
-import __crossover__
-import __algorithms__
+import __utilities__, __mutations__, __crossover__, __algorithms__, __selection__
 import os
 from deap import creator, base, tools, algorithms
 from qiskit import QuantumCircuit, Aer, transpile
@@ -41,7 +38,7 @@ else:
     weight = 100
 
 if t_count:
-    creator.create("FitnessMax", base.Fitness, weights=(weight, -1, -1, -1))
+    creator.create("FitnessMax", base.Fitness, weights=(weight, -1, -1))
 else:
     creator.create("FitnessMax", base.Fitness, weights=(weight,))
 creator.create("Individual", list, fitness=creator.FitnessMax)
@@ -132,6 +129,10 @@ if __name__ == "__main__":
             toolbox.register("select", tools.selLexicase)
         case "selDoubleTournament":
             toolbox.register("select", tools.selDoubleTournament, fitness_size=4, parsimony_size=1.5, fitness_first=True)
+        case "selNSGA2":
+            toolbox.register("select", tools.selNSGA2)
+        case "selBestDuplication":
+            toolbox.register("select", __selection__.selBestDuplication)
 
     toolbox.register("mutate", __mutations__.mixed_mutation, no_qb=no_qb)
     _genetic_algorithm()

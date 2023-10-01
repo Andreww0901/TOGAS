@@ -24,14 +24,14 @@ bckgrnd_col = 'White'
 txt_col = 'Black'
 
 cxList = ['OnePointCX', 'TwoPointCX', 'MessyOnePoint', 'UniformCX']
-selList = ['selBest', 'selTournament', 'selRoulette', 'selRandom', 'selWorst', 'selLexicase', 'selDoubleTournament']
+selList = ['selBest', 'selTournament', 'selRoulette', 'selRandom', 'selWorst', 'selLexicase', 'selDoubleTournament', 'selNSGA2', 'selBestDuplication']
 
 if not os.path.exists('./circuitDiagrams/'):
     os.mkdir('./circuitDiagrams/')
 
 layout = [[PyGUI.Menu([['File', ['Visualise Solution', 'Exit']], ['Settings', ['Additional Settings']],
                        ['Help', ['General Help', 'About']]])],
-          [PyGUI.Text('Genetic Quantum Circuit Synthesizer For State Preperation', font=heading_font,
+          [PyGUI.Text('T-count Optimising Genetic Algorithm for State-preparation', font=heading_font,
                       background_color=bckgrnd_col,
                       text_color=txt_col)],
           [PyGUI.HSeparator(color=txt_col)],
@@ -42,12 +42,12 @@ layout = [[PyGUI.Menu([['File', ['Visualise Solution', 'Exit']], ['Settings', ['
            PyGUI.Text('', background_color=bckgrnd_col, text_color=txt_col, font=body_font, key='-BF-')],
           [PyGUI.Text('POPULATION SIZE:', background_color=bckgrnd_col, text_color=txt_col, font=body_font),
            PyGUI.InputText(size=(20, 1), background_color=bckgrnd_col, text_color=txt_col, font=body_font,
-                           default_text="100",
+                           default_text="150",
                            border_width=1, key='-POPSIZE-'),
            PyGUI.Push(background_color=bckgrnd_col)],
           [PyGUI.Text('NO. OF GENERATIONS:', background_color=bckgrnd_col, text_color=txt_col, font=body_font),
            PyGUI.InputText(size=(17, 1), background_color=bckgrnd_col, text_color=txt_col, font=body_font,
-                           default_text="30000",
+                           default_text="20000",
                            border_width=1, key='-NGENS-')],
           [PyGUI.Text('CROSSOVER PROB.:', background_color=bckgrnd_col, text_color=txt_col, font=body_font),
            PyGUI.InputText(size=(20, 1), background_color=bckgrnd_col, text_color=txt_col, font=body_font,
@@ -56,7 +56,7 @@ layout = [[PyGUI.Menu([['File', ['Visualise Solution', 'Exit']], ['Settings', ['
            PyGUI.Push(background_color=bckgrnd_col)],
           [PyGUI.Text('MUTATION PROB.:', background_color=bckgrnd_col, text_color=txt_col, font=body_font),
            PyGUI.InputText(size=(21, 1), background_color=bckgrnd_col, text_color=txt_col, font=body_font,
-                           default_text="0.5",
+                           default_text="0.25",
                            border_width=1, key='-MUTPB-')],
           [PyGUI.Text('CROSSOVER TYPE:', background_color=bckgrnd_col, text_color=txt_col, font=body_font),
            PyGUI.Combo(cxList, size=(20, 1), text_color=txt_col,
@@ -96,7 +96,7 @@ if __name__ == "__main__":
     event, values = window.read(timeout=0)
 
     GA_proc, prev_hof, hof, backend = None, None, None, None
-    no_qb, no_anci, sseed, stcount, noisesim, visualisation, svtype, phase_info = 6, 0, False, True, False, False, 'Poisson', False
+    no_qb, no_anci, sseed, stcount, noisesim, visualisation, svtype, phase_info = 4, 0, False, True, False, True, 'Poisson', False
     gen, hof_list, hof_ind = [], [], []
     stop = False
     i = 1
@@ -175,15 +175,14 @@ if __name__ == "__main__":
                 hof = literal_eval(line[4:-1])
                 hof_list.append(hof[0])
                 hof_ind.append(hof[1])
-                if hof[0] >= 100:
+                if hof[0][0] >= 100:
                     GA_proc.terminate()
                     GA_proc = None
-                    stop = True
 
             elif line.startswith("AVGLEN:"):
                 window['-AVGLEN-'].update(f'{line[7:-1]}')
 
-            if line.startswith('END') or stop:
+            if stop:
                 if not os.path.exists(f'./evaluations/selections/{values["-SEL-"]}'):
                     os.mkdir(f'./evaluations/selections/{values["-SEL-"]}')
                 df = DataFrame({'Generation': gen, 'HOFFitness': hof_list, 'HOFInd': hof_ind})
@@ -207,7 +206,7 @@ if __name__ == "__main__":
                 else:
                     window['-HG-'].update(filename="./circuitDiagrams/combined_img_resized.png")
             window['-LIST-'].update(hof[1])
-            window['-BF-'].update(f'{hof[0]} - GATE COUNT:{len(hof[1])}')
+            window['-BF-'].update(f'{hof[0][0]} - GATE COUNT:{len(hof[1])}')
             gc.collect()
 
         prev_hof = hof
