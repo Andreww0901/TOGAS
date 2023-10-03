@@ -1,4 +1,5 @@
 import random
+import matplotlib
 from math import pi, sqrt, floor, exp
 from cmath import isclose
 from qiskit import QuantumCircuit, assemble, Aer, transpile
@@ -133,7 +134,7 @@ def visualise(hof, no_qb, no_anci, backend):
 
 def draw_circuit(individual, no_qb, filename, ancillae):
     circuit = circuit_builder(individual, no_qb, ancillae)
-    circuit.draw(output="mpl", filename=f'./circuitDiagrams/{filename}')
+    matplotlib.pyplot.close(circuit.draw(output="mpl", filename=f'./circuitDiagrams/{filename}'))
 
 
 def plot_hist(individual, no_qb, filename):
@@ -142,12 +143,12 @@ def plot_hist(individual, no_qb, filename):
     job = simulator.run(circuit, shots=10000)
     results = job.result()
     counts = results.get_counts(circuit)
-    plot_histogram(counts, filename=f'./circuitDiagrams/{filename}')
+    matplotlib.pyplot.close(plot_histogram(counts, filename=f'./circuitDiagrams/{filename}'))
 
 
 def plot_city(individual, no_qb, filename, ancillae, noise=None):
     if isinstance(individual, Statevector):
-        individual.draw(output='city', filename=f'./circuitDiagrams/{filename}', title='Desired State', color=['cornflowerblue', 'yellow'])
+        matplotlib.pyplot.close(individual.draw(output='city', filename=f'./circuitDiagrams/{filename}', title='Desired State', color=['cornflowerblue', 'yellow']))
     elif isinstance(individual, list):
         circuit = circuit_builder(individual, no_qb, ancillae)
         if noise:
@@ -157,7 +158,7 @@ def plot_city(individual, no_qb, filename, ancillae, noise=None):
         qobj = transpile(circuit, simulator)
         result = simulator.run(qobj).result().get_statevector()
         result = Statevector(list(result.data)[:2 ** (no_qb - ancillae)], dims=tuple(2 for _ in range(no_qb - ancillae)))
-        result.draw(output='city', filename=f'./circuitDiagrams/{filename}', title='Best Generated State', color=['cornflowerblue', 'yellow'])
+        matplotlib.pyplot.close(result.draw(output='city', filename=f'./circuitDiagrams/{filename}', title='Best Generated State', color=['cornflowerblue', 'yellow']))
     else:
         return
 

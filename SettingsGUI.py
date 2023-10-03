@@ -1,15 +1,15 @@
 import copy
-
 import PySimpleGUI as PyGUI
 import base64
 import time
+from SVGUI import custom_statevector
 
 heading_font = ("IBM Plex Mono", 24)
 body_font = ("IBM Plex Mono Light", 16)
 bckgrnd_col = 'White'
 txt_col = 'Black'
 
-statevectors = ['Random', 'Poisson', 'W']
+statevectors = ['Random', 'Poisson', 'W', 'Custom']
 
 
 def layout():
@@ -44,16 +44,17 @@ def layout():
             [PyGUI.Text('STATEVECTOR TYPE:', background_color=bckgrnd_col, text_color=txt_col, font=body_font),
              PyGUI.Combo(statevectors, size=(15, 1), text_color=txt_col,
                          background_color=bckgrnd_col, font=body_font, readonly=True, default_value='Poisson',
-                         button_background_color=txt_col, button_arrow_color=bckgrnd_col, key='-SVSEL-')],
+                         button_background_color=txt_col, button_arrow_color=bckgrnd_col, key='-SVSEL-'),
+             PyGUI.Button('EDIT', font=body_font, button_color=(bckgrnd_col, '#171717'), border_width=0, visible=False, key='-CUSTOMBUT-')],
             [PyGUI.VPush(background_color=bckgrnd_col)],
-            [PyGUI.Button('SAVE & CLOSE', font=body_font, button_color=(bckgrnd_col, '#0088ff'), border_width=0)]]
+            [PyGUI.Button('SAVE & CLOSE', font=body_font, button_color=(bckgrnd_col, '#171717'), border_width=0)]]
 
 
-def additional_settings(no_qb, no_anci, sseed, stcount, noisesim, visualisation, svtype, phase_info):
+def additional_settings(no_qb, no_anci, sseed, stcount, noisesim, visualisation, svtype, cust_sv, phase_info):
     window = PyGUI.Window('Additional Settings',
                           layout=layout(),
                           background_color=bckgrnd_col,
-                          size=(400, 350),
+                          size=(450, 360),
                           keep_on_top=True,
                           resizable=True,
                           finalize=True,
@@ -74,13 +75,21 @@ def additional_settings(no_qb, no_anci, sseed, stcount, noisesim, visualisation,
         if event == PyGUI.WIN_CLOSED or event == 'Close':
             break
 
+        elif event == '-CUSTOMBUT-':
+            cust_sv = custom_statevector(cust_sv, values['-NOQB-'])
+
         elif event == 'SAVE & CLOSE':
             s_c = True
             break
 
+        if values['-SVSEL-'] == 'Custom':
+            window['-CUSTOMBUT-'].update(visible=True)
+        else:
+            window['-CUSTOMBUT-'].update(visible=False)
+
     window.close()
     if s_c:
         return values['-NOQB-'], values['-NOANCI-'], values['-SSEED-'], values['-STCOUNT-'], values['-SNOISE-'], \
-            values['-VISUA-'], values['-SVSEL-'], values['-PHASEINFO-']
+            values['-VISUA-'], values['-SVSEL-'], cust_sv, values['-PHASEINFO-']
     else:
-        return no_qb, no_anci, sseed, stcount, noisesim, visualisation, svtype, phase_info
+        return no_qb, no_anci, sseed, stcount, noisesim, visualisation, svtype, cust_sv, phase_info

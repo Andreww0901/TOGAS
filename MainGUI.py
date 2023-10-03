@@ -1,10 +1,12 @@
 import PySimpleGUI as PyGUI
 import subprocess as sp
+import threading
 import os
 import base64
 import gc
 import matplotlib.pyplot as plt
 from SettingsGUI import additional_settings
+from WarningGUI import warning_gui
 from ast import literal_eval
 from __utilities__ import draw_circuit, plot_hist, plot_city, img_resize, img_combine, visualise
 from __statecreation___ import poisson, w
@@ -22,69 +24,78 @@ heading_font = ("IBM Plex Mono", 24)
 body_font = ("IBM Plex Mono Light", 16)
 bckgrnd_col = 'White'
 txt_col = 'Black'
+line = ''
 
 cxList = ['OnePointCX', 'TwoPointCX', 'MessyOnePoint', 'UniformCX']
-selList = ['selBest', 'selTournament', 'selRoulette', 'selRandom', 'selWorst', 'selLexicase', 'selDoubleTournament', 'selNSGA2', 'selBestDuplication']
+selList = ['selBest', 'selTournament', 'selRoulette', 'selRandom', 'selWorst', 'selLexicase', 'selDoubleTournament',
+           'selNSGA2', 'selBestDuplication']
 
 if not os.path.exists('./circuitDiagrams/'):
     os.mkdir('./circuitDiagrams/')
 
-layout = [[PyGUI.Menu([['File', ['Visualise Solution', 'Exit']], ['Settings', ['Additional Settings']],
-                       ['Help', ['General Help', 'About']]])],
-          [PyGUI.Text('T-count Optimising Genetic Algorithm for State-preparation', font=heading_font,
-                      background_color=bckgrnd_col,
-                      text_color=txt_col)],
-          [PyGUI.HSeparator(color=txt_col)],
-          [PyGUI.Push(background_color=bckgrnd_col)],
-          [PyGUI.Text('GENERATION:', background_color=bckgrnd_col, text_color=txt_col, font=body_font),
-           PyGUI.Text('', background_color=bckgrnd_col, text_color=txt_col, font=body_font, key='-GEN-')],
-          [PyGUI.Text('BEST FITNESS:', background_color=bckgrnd_col, text_color=txt_col, font=body_font),
-           PyGUI.Text('', background_color=bckgrnd_col, text_color=txt_col, font=body_font, key='-BF-')],
-          [PyGUI.Text('POPULATION SIZE:', background_color=bckgrnd_col, text_color=txt_col, font=body_font),
-           PyGUI.InputText(size=(20, 1), background_color=bckgrnd_col, text_color=txt_col, font=body_font,
-                           default_text="150",
-                           border_width=1, key='-POPSIZE-'),
-           PyGUI.Push(background_color=bckgrnd_col)],
-          [PyGUI.Text('NO. OF GENERATIONS:', background_color=bckgrnd_col, text_color=txt_col, font=body_font),
-           PyGUI.InputText(size=(17, 1), background_color=bckgrnd_col, text_color=txt_col, font=body_font,
-                           default_text="20000",
-                           border_width=1, key='-NGENS-')],
-          [PyGUI.Text('CROSSOVER PROB.:', background_color=bckgrnd_col, text_color=txt_col, font=body_font),
-           PyGUI.InputText(size=(20, 1), background_color=bckgrnd_col, text_color=txt_col, font=body_font,
-                           default_text="0.5",
-                           border_width=1, key='-CXPB-'),
-           PyGUI.Push(background_color=bckgrnd_col)],
-          [PyGUI.Text('MUTATION PROB.:', background_color=bckgrnd_col, text_color=txt_col, font=body_font),
-           PyGUI.InputText(size=(21, 1), background_color=bckgrnd_col, text_color=txt_col, font=body_font,
-                           default_text="0.25",
-                           border_width=1, key='-MUTPB-')],
-          [PyGUI.Text('CROSSOVER TYPE:', background_color=bckgrnd_col, text_color=txt_col, font=body_font),
-           PyGUI.Combo(cxList, size=(20, 1), text_color=txt_col,
-                       background_color=bckgrnd_col, font=body_font, readonly=True, default_value='MessyOnePoint',
-                       button_background_color=txt_col, button_arrow_color=bckgrnd_col, key='-CX-')],
-          [PyGUI.Text('SELECTION TYPE:', background_color=bckgrnd_col, text_color=txt_col, font=body_font),
-           PyGUI.Combo(selList,
-                       size=(20, 1), text_color=txt_col,
-                       background_color=bckgrnd_col, font=body_font, readonly=True, default_value='selBest',
-                       button_background_color=txt_col, button_arrow_color=bckgrnd_col, key='-SEL-'),
-           PyGUI.Push(background_color=bckgrnd_col),
-           PyGUI.Text('', background_color=bckgrnd_col, text_color=txt_col, font=body_font, key='-AVGLEN-'),
-           PyGUI.Text(':AVERAGE SOLUTION LENGTH', background_color=bckgrnd_col, text_color=txt_col, font=body_font)],
-          [PyGUI.Button('START', button_color=(bckgrnd_col, "#1ec74b"), font=body_font, border_width=0),
-           PyGUI.Button('STOP', button_color=(bckgrnd_col, "#c91827"), font=body_font, border_width=0),
-           PyGUI.Multiline(size=(1000, 1), background_color=bckgrnd_col, text_color=txt_col, font=body_font,
-                           key='-LIST-')],
-          [PyGUI.HSeparator(color=txt_col)],
-          [PyGUI.Push(background_color=bckgrnd_col)],
-          [PyGUI.Text('BEST CIRCUIT DESIGN', background_color=bckgrnd_col, text_color=txt_col, font=body_font),
-           PyGUI.Push(background_color=bckgrnd_col),
-           PyGUI.Text('STATEVECTOR COMPARISON', background_color=bckgrnd_col, text_color=txt_col, font=body_font)],
-          [PyGUI.Image("", key='-CD-'),
-           PyGUI.Push(background_color=bckgrnd_col),
-           PyGUI.Image("", key='-HG-')]]
+layout = [[PyGUI.Menu(
+    [['File', ['Visualise Solution', 'Exit']], ['Settings', ['Additional Settings']]])],
+    [PyGUI.Text('T-count Optimising Genetic Algorithm for State-preparation', font=heading_font,
+                background_color=bckgrnd_col,
+                text_color=txt_col)],
+    [PyGUI.HSeparator(color=txt_col)],
+    [PyGUI.Push(background_color=bckgrnd_col)],
+    [PyGUI.Text('GENERATION:', background_color=bckgrnd_col, text_color=txt_col, font=body_font),
+     PyGUI.Text('', background_color=bckgrnd_col, text_color=txt_col, font=body_font, key='-GEN-')],
+    [PyGUI.Text('BEST FITNESS:', background_color=bckgrnd_col, text_color=txt_col, font=body_font),
+     PyGUI.Text('', background_color=bckgrnd_col, text_color=txt_col, font=body_font, key='-BF-')],
+    [PyGUI.Text('POPULATION SIZE:', background_color=bckgrnd_col, text_color=txt_col, font=body_font),
+     PyGUI.InputText(size=(20, 1), background_color=bckgrnd_col, text_color=txt_col, font=body_font,
+                     default_text="150",
+                     border_width=1, key='-POPSIZE-'),
+     PyGUI.Push(background_color=bckgrnd_col)],
+    [PyGUI.Text('NO. OF GENERATIONS:', background_color=bckgrnd_col, text_color=txt_col, font=body_font),
+     PyGUI.InputText(size=(17, 1), background_color=bckgrnd_col, text_color=txt_col, font=body_font,
+                     default_text="20000",
+                     border_width=1, key='-NGENS-')],
+    [PyGUI.Text('CROSSOVER PROB.:', background_color=bckgrnd_col, text_color=txt_col, font=body_font),
+     PyGUI.InputText(size=(20, 1), background_color=bckgrnd_col, text_color=txt_col, font=body_font,
+                     default_text="0.5",
+                     border_width=1, key='-CXPB-'),
+     PyGUI.Push(background_color=bckgrnd_col)],
+    [PyGUI.Text('MUTATION PROB.:', background_color=bckgrnd_col, text_color=txt_col, font=body_font),
+     PyGUI.InputText(size=(21, 1), background_color=bckgrnd_col, text_color=txt_col, font=body_font,
+                     default_text="0.25",
+                     border_width=1, key='-MUTPB-')],
+    [PyGUI.Text('CROSSOVER TYPE:', background_color=bckgrnd_col, text_color=txt_col, font=body_font),
+     PyGUI.Combo(cxList, size=(20, 1), text_color=txt_col,
+                 background_color=bckgrnd_col, font=body_font, readonly=True, default_value='MessyOnePoint',
+                 button_background_color=txt_col, button_arrow_color=bckgrnd_col, key='-CX-')],
+    [PyGUI.Text('SELECTION TYPE:', background_color=bckgrnd_col, text_color=txt_col, font=body_font),
+     PyGUI.Combo(selList,
+                 size=(20, 1), text_color=txt_col,
+                 background_color=bckgrnd_col, font=body_font, readonly=True, default_value='selBestDuplication',
+                 button_background_color=txt_col, button_arrow_color=bckgrnd_col, key='-SEL-'),
+     PyGUI.Push(background_color=bckgrnd_col),
+     PyGUI.Text('', background_color=bckgrnd_col, text_color=txt_col, font=body_font, key='-AVGLEN-'),
+     PyGUI.Text(':AVERAGE SOLUTION LENGTH', background_color=bckgrnd_col, text_color=txt_col, font=body_font)],
+    [PyGUI.Button('START', button_color=(bckgrnd_col, "#1ec74b"), font=body_font, border_width=0),
+     PyGUI.Button('STOP', button_color=(bckgrnd_col, "#c91827"), font=body_font, border_width=0),
+     PyGUI.Multiline(size=(1000, 1), background_color=bckgrnd_col, text_color=txt_col, font=body_font,
+                     key='-LIST-', sbar_frame_color='black', sbar_trough_color='White', sbar_background_color='Black',
+                     sbar_arrow_color='White')],
+    [PyGUI.HSeparator(color=txt_col)],
+    [PyGUI.Push(background_color=bckgrnd_col)],
+    [PyGUI.Text('BEST CIRCUIT DESIGN', background_color=bckgrnd_col, text_color=txt_col, font=body_font),
+     PyGUI.Push(background_color=bckgrnd_col),
+     PyGUI.Text('STATEVECTOR COMPARISON', background_color=bckgrnd_col, text_color=txt_col, font=body_font)],
+    [PyGUI.Image("", key='-CD-'),
+     PyGUI.Push(background_color=bckgrnd_col),
+     PyGUI.Image("", key='-HG-')]]
+
+
+def timeout_readline(proc):
+    global line
+    line = proc.stdout.readline()
+
 
 if __name__ == "__main__":
-    window = PyGUI.Window(f'Genetic Quantum Circuit Synthesizer',
+    window = PyGUI.Window(f'T-count Optimising Genetic Algorithm for State-preparation',
                           layout=layout,
                           background_color=bckgrnd_col,
                           resizable=True,
@@ -95,8 +106,8 @@ if __name__ == "__main__":
     window.Maximize()
     event, values = window.read(timeout=0)
 
-    GA_proc, prev_hof, hof, backend = None, None, None, None
-    no_qb, no_anci, sseed, stcount, noisesim, visualisation, svtype, phase_info = 4, 0, False, True, False, True, 'Poisson', False
+    GA_proc, prev_hof, hof, backend, rdline = None, None, None, None, None
+    no_qb, no_anci, sseed, stcount, noisesim, visualisation, svtype, cust_sv, phase_info = 4, 0, False, True, False, True, 'W', [], False
     gen, hof_list, hof_ind = [], [], []
     stop = False
     i = 1
@@ -114,10 +125,21 @@ if __name__ == "__main__":
             bckend = None
 
         if svtype == 'Poisson':
-            singular = poisson(((2**int(no_qb)) / 2), int(no_qb))
+            singular = poisson(((2 ** int(no_qb)) / 2), int(no_qb))
         elif svtype == 'W':
             singular = w(no_qb)
-        elif svtype == 'Random':
+        elif svtype == 'Custom':
+            try:
+                singular = Statevector(literal_eval(cust_sv), dims=tuple(2 for _ in range(no_qb)))
+                if not singular.is_valid():
+                    warning_gui(
+                        f'The custom statevector you have defined is invalid. Reason: Qiskit method "Statevector.is_valid" returned False. Please try again.')
+                    return None, None
+            except Exception as e:
+                warning_gui(f'The custom statevector you have defined is invalid. Reason: {e}. Please try again.')
+                return None, None
+
+        else:
             if sseed:
                 singular = random_statevector(tuple(2 for _ in range(no_qb)), seed=2)
             else:
@@ -148,13 +170,26 @@ if __name__ == "__main__":
             if GA_proc is not None:
                 GA_proc.terminate()
             GA_proc, backend = sub_process()
+            if GA_proc is None and backend is None:
+                continue
+            rdline = threading.Thread(target=timeout_readline, args=(GA_proc,))
+            rdline.start()
 
         elif event == 'STOP' and GA_proc is not None:
             GA_proc.terminate()
             GA_proc = None
 
         elif event == 'Additional Settings' and GA_proc is None:
-            no_qb, no_anci, sseed, stcount, noisesim, visualisation, svtype, phase_info = additional_settings(no_qb, no_anci, sseed, stcount, noisesim, visualisation, svtype, phase_info)
+            no_qb, no_anci, sseed, stcount, noisesim, visualisation, svtype, cust_sv, phase_info = additional_settings(
+                no_qb,
+                no_anci,
+                sseed,
+                stcount,
+                noisesim,
+                visualisation,
+                svtype,
+                cust_sv,
+                phase_info)
 
         elif event == 'Visualise Solution' and hof is not None:
             visualise(hof, no_qb, no_anci, backend)
@@ -163,13 +198,18 @@ if __name__ == "__main__":
             Image.open('./circuitDiagrams/hof_Hist.png').show()
 
         if GA_proc is not None:
-            line = GA_proc.stdout.readline()
+            if not rdline.is_alive() and line == '':
+                rdline = threading.Thread(target=timeout_readline, args=(GA_proc,))
+                rdline.start()
+
             if line.startswith("SV:"):
                 print(line)
+                line = ''
 
             elif line.startswith("GEN:"):
                 window['-GEN-'].update(f'{line[4:-1]}/{values["-NGENS-"]}')
                 gen.append(line[4:-1])
+                line = ''
 
             elif line.startswith("HOF:"):
                 hof = literal_eval(line[4:-1])
@@ -178,9 +218,11 @@ if __name__ == "__main__":
                 if hof[0][0] >= 100:
                     GA_proc.terminate()
                     GA_proc = None
+                line = ''
 
             elif line.startswith("AVGLEN:"):
                 window['-AVGLEN-'].update(f'{line[7:-1]}')
+                line = ''
 
             if stop:
                 if not os.path.exists(f'./evaluations/selections/{values["-SEL-"]}'):
