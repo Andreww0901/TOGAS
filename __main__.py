@@ -10,6 +10,7 @@ from qiskit_ibm_provider import IBMProvider
 from ast import literal_eval
 from math import exp
 from operator import attrgetter
+from WarningGUI import warning_gui
 
 pop_size = int(sys.argv[1])
 no_gens = int(sys.argv[2])
@@ -48,7 +49,12 @@ toolbox.register("individual", __utilities__.init_setup, creator.Individual, no_
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 if poisson_:
     circuit = QuantumCircuit(no_qb)
-    circuit.initialize(singular)
+    try:
+        circuit.initialize(singular)
+    except Exception as e:
+        print('SETUP_FAIL')
+        warning_gui(f'The custom statevector you have defined is invalid. Reason: {e}. Please try again.')
+        exit()
     circuit.measure_all()
     if noise:
         simulator = AerSimulator.from_backend(backend)
@@ -135,4 +141,5 @@ if __name__ == "__main__":
             toolbox.register("select", __selection__.selBestDuplication)
 
     toolbox.register("mutate", __mutations__.mixed_mutation, no_qb=no_qb)
+    print('SETUP_PASS')
     _genetic_algorithm()

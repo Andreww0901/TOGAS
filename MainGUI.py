@@ -1,9 +1,12 @@
+import subprocess
+
 import PySimpleGUI as PyGUI
 import subprocess as sp
 import threading
 import os
 import base64
 import gc
+import time
 import matplotlib.pyplot as plt
 from SettingsGUI import additional_settings
 from WarningGUI import warning_gui
@@ -165,15 +168,22 @@ if __name__ == "__main__":
             break
 
         elif event == 'START':
-            poisson_ = False
             i = 1
+            setup = ''
             if GA_proc is not None:
                 GA_proc.terminate()
             GA_proc, backend = sub_process()
+            while not setup.startswith('SETUP'):
+                setup = GA_proc.stdout.readline()
+                print(setup)
             if GA_proc is None and backend is None:
                 continue
-            rdline = threading.Thread(target=timeout_readline, args=(GA_proc,))
-            rdline.start()
+            elif setup.startswith('SETUP_F'):
+                GA_proc = None
+                continue
+            else:
+                rdline = threading.Thread(target=timeout_readline, args=(GA_proc,))
+                rdline.start()
 
         elif event == 'STOP' and GA_proc is not None:
             GA_proc.terminate()
@@ -198,7 +208,7 @@ if __name__ == "__main__":
             Image.open('./circuitDiagrams/hof_Hist.png').show()
 
         if GA_proc is not None:
-            if not rdline.is_alive() and line == '':
+            if not rdline.is_alive() and (line == '' or 'patch' in line):
                 rdline = threading.Thread(target=timeout_readline, args=(GA_proc,))
                 rdline.start()
 

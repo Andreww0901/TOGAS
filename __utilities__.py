@@ -110,13 +110,10 @@ def count_evaluate(individual, no_qb, t_count, ancillae, des_counts, noise=None)
     total = sum(k.values())/10000
     if t_count:
         no_tg = 0
-        no_cnot = 0
         for x in range(len(individual)):
             if individual[x][0] == 'TGate' or individual[x][0] == 'TDGGate':
                 no_tg += 1
-            elif individual[x][0] == 'CNOT':
-                no_cnot += 1
-        return total, no_tg, no_cnot
+        return total, len(individual), no_tg
     else:
         return total,
 
