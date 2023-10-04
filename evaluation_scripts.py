@@ -8,7 +8,7 @@ from __statecreation___ import poisson, w
 from qiskit.quantum_info import random_statevector
 from ast import literal_eval
 
-no_qbs = range(4, 7)
+no_qbs = range(3, 7)
 states = ['Random', 'Poisson', 'W']
 
 if __name__ == "__main__":
