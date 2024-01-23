@@ -9,7 +9,7 @@ body_font = ("IBM Plex Mono Light", 16)
 bckgrnd_col = 'White'
 txt_col = 'Black'
 
-statevectors = ['Random', 'Poisson', 'W', 'Custom']
+statevectors = ['Random', 'Poisson', 'W', 'QFT', 'Custom']
 
 
 def layout():

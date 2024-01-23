@@ -12,7 +12,7 @@ from SettingsGUI import additional_settings
 from WarningGUI import warning_gui
 from ast import literal_eval
 from __utilities__ import draw_circuit, plot_hist, plot_city, img_resize, img_combine, visualise
-from __statecreation___ import poisson, w
+from __statecreation___ import poisson, w, qft
 from qiskit.quantum_info import random_statevector, Statevector
 from pandas import DataFrame
 from qiskit_ibm_provider import IBMProvider
@@ -131,6 +131,8 @@ if __name__ == "__main__":
             singular = poisson(((2 ** int(no_qb)) / 2), int(no_qb))
         elif svtype == 'W':
             singular = w(no_qb)
+        elif svtype == 'QFT':
+            singular = qft(no_qb)
         elif svtype == 'Custom':
             try:
                 singular = Statevector(literal_eval(cust_sv), dims=tuple(2 for _ in range(no_qb)))
@@ -225,9 +227,6 @@ if __name__ == "__main__":
                 hof = literal_eval(line[4:-1])
                 hof_list.append(hof[0])
                 hof_ind.append(hof[1])
-                if hof[0][0] >= 100:
-                    GA_proc.terminate()
-                    GA_proc = None
                 line = ''
 
             elif line.startswith("AVGLEN:"):
