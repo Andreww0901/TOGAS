@@ -13,7 +13,7 @@ Note:
 
  - If simulating using noise, you will need an IBM Quantum account:
 
- - In ```MainGUI.py``` uncomment: ```IBMProvider.save_account(token="MY_API_TOKEN", overwrite=True)``` (*Line 17*) and replace ```MY_API_TOKEN``` with the token associated with your IBM Quantum account. 
+ - In ```MainGUI.py``` uncomment: ```IBMProvider.save_account(token="MY_API_TOKEN", overwrite=True)``` (*Line 21*) and replace ```MY_API_TOKEN``` with the token associated with your IBM Quantum account. 
 
  - You will only need to do this for one execution - from then on, that line can be removed/commented out again.
 
