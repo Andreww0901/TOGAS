@@ -4,14 +4,14 @@
 
 #### T-Count Optimising Genetic Algorithm for State-Preparation
 
-- Random state preperation using genetic algorithms
+- Quantum state preperation using genetic algorithms
 - Optimised for T-Count (Can be more generally applied to different types of quantum computer instead of just IBM Quantum systems)
 
-**Execute from GUI.py**
+**Execute from MainGUI.py**
 
 Note: 
 
- - If simulating using noise, you will need an IBM Quantum account. 
+ - If simulating using noise, you will need an IBM Quantum account:
 
  - In ```MainGUI.py``` uncomment: ```IBMProvider.save_account(token="MY_API_TOKEN", overwrite=True)``` (*Line 17*) and replace ```MY_API_TOKEN``` with the token associated with your IBM Quantum account. 
 
