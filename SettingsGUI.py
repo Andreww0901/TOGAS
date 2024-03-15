@@ -9,7 +9,7 @@ body_font = ("IBM Plex Mono Light", 16)
 bckgrnd_col = 'White'
 txt_col = 'Black'
 
-statevectors = ['Random', 'Poisson', 'W', 'QFT', 'Custom']
+statevectors = ['Random', 'Poisson', 'W', 'QFT', 'GHZ', 'Custom']
 
 
 def layout():
@@ -17,7 +17,7 @@ def layout():
             [PyGUI.Text('Additional Settings', font=heading_font, text_color=txt_col, background_color=bckgrnd_col)],
             [PyGUI.HSeparator(color=txt_col)],
             [PyGUI.Text('NO. OF QUBITS:', background_color=bckgrnd_col, text_color=txt_col, font=body_font),
-             PyGUI.Spin([i for i in range(1, 10)], initial_value=3, size=5, key='-NOQB-')],
+             PyGUI.Spin([i for i in range(1, 13)], initial_value=3, size=5, key='-NOQB-')],
             [PyGUI.Text('NO. OF ANCILLAE:', background_color=bckgrnd_col, text_color=txt_col, font=body_font),
              PyGUI.Spin([i for i in range(5)], initial_value=0, size=5, key='-NOANCI-')],
             [PyGUI.Text('SET SEED:', background_color=bckgrnd_col, text_color=txt_col, font=body_font),

@@ -1,5 +1,4 @@
 import subprocess
-
 import PySimpleGUI as PyGUI
 import subprocess as sp
 import threading
@@ -12,7 +11,7 @@ from SettingsGUI import additional_settings
 from WarningGUI import warning_gui
 from ast import literal_eval
 from __utilities__ import draw_circuit, plot_hist, plot_city, img_resize, img_combine, visualise
-from __statecreation___ import poisson, w, qft
+from __statecreation__ import poisson, w, qft, GHZ
 from qiskit.quantum_info import random_statevector, Statevector
 from pandas import DataFrame
 from qiskit_ibm_provider import IBMProvider
@@ -132,7 +131,11 @@ if __name__ == "__main__":
         elif svtype == 'W':
             singular = w(no_qb)
         elif svtype == 'QFT':
-            singular = qft(no_qb)
+            stateList = [(0 + 0j) for _ in range((2 ** no_qb) - 1)]
+            stateList.append((1 + 0j))
+            singular = qft(no_qb, stateList)
+        elif svtype == 'GHZ':
+            singular = GHZ(no_qb)
         elif svtype == 'Custom':
             try:
                 singular = Statevector(literal_eval(cust_sv), dims=tuple(2 for _ in range(no_qb)))
@@ -149,7 +152,8 @@ if __name__ == "__main__":
                 singular = random_statevector(tuple(2 for _ in range(no_qb)), seed=2)
             else:
                 singular = random_statevector(tuple(2 for _ in range(no_qb)))
-        plot_city(singular, no_qb, "desiredState.png", int(noisesim))
+        if no_qb <= 6:
+            plot_city(singular, no_qb, "desiredState.png", int(noisesim))
         print(singular)
         if no_qb <= no_anci:
             return None, None

@@ -4,22 +4,29 @@ import os
 import sys
 import time
 from itertools import product
-from __statecreation___ import poisson, w
+from __statecreation__ import poisson, w, qft, GHZ
 from qiskit.quantum_info import random_statevector
 from ast import literal_eval
 
 no_qbs = range(3, 7)
-states = ['Random', 'Poisson', 'W']
+states = ['Random', 'Poisson', 'W', 'GHZ', 'QFT']
 
 if __name__ == "__main__":
     for qb, state in product(no_qbs, states):
+        stateList = [(0 + 0j) for _ in range((2 ** qb) - 1)]
+        stateList.append((1 + 0j))
+
         match state:
             case 'Random':
-                singular = random_statevector(tuple(2 for _ in range(qb)), seed=2)
+                singular = random_statevector(tuple(2 for _ in range(qb)))
             case 'Poisson':
                 singular = poisson(((2**int(qb)) / 2), int(qb))
             case 'W':
                 singular = w(qb)
+            case 'QFT':
+                singular = qft(qb, stateList)
+            case 'GHZ':
+                singular = GHZ(qb)
 
         avg_len = 0
         gens, hof_fit_list, hof, t_count, length = [], [], [], [], []
